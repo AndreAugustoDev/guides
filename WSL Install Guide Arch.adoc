@@ -1,0 +1,74 @@
+= 🐧 WSL installation with Arch Linux & Nix 
+:doctype: article
+:encoding: utf-8
+:lang: en
+:toc: left
+:numbered:
+
+== https://archlinux.org/[🔼 Arch Linux WSL install]
+
+=== Download and extract the zip file from https://github.com/yuk7/ArchWSL/releases/latest[yuk7/ArchWSL]
+
+=== Run `Arch.exe` to extract the rootfs and register to WSL.
+> The executable name is what is used as the WSL instance name. +
+If you rename it, you can have multiple installs.
+
+== Basic setup
+
+=== Setup pacman keyring
+[source,sh]
+----
+pacman-key --init
+pacman-key --populate archlinux
+----
+
+=== Update mirrolist
+[source,sh]
+----
+curl "https://archlinux.org/mirrorlist/?country=US&protocol=https&ip_version=4&use_mirror_status=on" | cut -c 2- > /etc/pacman.d/mirrorlist
+----
+
+=== Update system
+[source,sh]
+pacman -Syu
+
+=== There will also be a handful of missing "base" packages that are always useful to have and can be installed with:
+[source,sh]
+pacman -S base base-devel
+
+== Install AUR Helper `paru`
+[source,sh]
+----
+git clone https://aur.archlinux.org/paru.git /tmp/paru
+cd /tmp/paru
+makepkg -si
+----
+
+== Configure user
+=== Set root password
+[source,sh]
+passwd
+
+=== Enable group `wheel` to use `sudo`
+[source,sh]
+----
+echo '%wheel ALL=(ALL:ALL) NOPASSWD: ALL' > /etc/sudoers.d/wheel
+----
+
+=== Create and add user to the `wheel` group
+[source,sh]
+----
+useradd -m <USERNAME> -G wheel
+----
+
+=== Set password for your user.
+[source,sh]
+----
+passwd <USERNAME>
+----
+
+=== Set default user
+[source,sh]
+----
+./Arch.exe config --default-user <USERNAME>
+----

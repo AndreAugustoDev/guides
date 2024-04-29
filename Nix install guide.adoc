@@ -1,0 +1,35 @@
+= ❄️ Nix install guide
+:doctype: article
+:encoding: utf-8
+:lang: en
+:toc: left
+:numbered:
+
+:zero-to-nix: https://zero-to-nix.com/[Zero to Nix]
+
+- This guide use Determinate Systems Nix installer from {zero-to-nix}.
+
+== Fetch and execute *{zero-to-nix}* install script
+[source,sh]
+----
+curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --diagnostic-endpoint=""
+----
+
+=== To get started using Nix, open a new shell or run
+[source,sh]
+----
+. /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+----
+
+== Unstable channel as default
+[source,sh]
+----
+nix-channel --add https://nixos.org/channels/nixos-unstable nixpkgs
+----
+
+== Garbage collection
+[source,sh]
+----
+nix-env --delete-generations old && nix-store --gc && nix-collect-garbage -d
+----
+

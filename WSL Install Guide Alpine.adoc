@@ -1,0 +1,125 @@
+= 🐧 WSL installation with Alpine Linux & Nix
+André Augusto
+:doctype: book
+:encoding: utf-8
+:lang: en
+:toc: left
+:numbered:
+
+= https://alpinelinux.org/[🏔️ Alpine Linux install]
+
+== Import image
+[source,sh]
+----
+wsl --import <DistroName> <InstallLocation> <InstallTarFile>
+
+wsl --import Alpine C:\Alpine .\alpine.tar.gz
+----
+
+== Change user to root and install `sudo`
+[source,sh]
+----
+su -
+apk add --no-cache sudo
+----
+
+== Enable group `wheel` to use `sudo`
+[source,sh]
+----
+echo '%wheel ALL=(ALL) ALL' > /etc/sudoers.d/wheel
+----
+
+== Add user to the `wheel` group
+[source,sh]
+----
+adduser <USERNAME>
+adduser <USERNAME> wheel
+----
+
+=== Set password for your user.
+[source,sh]
+----
+passwd <USERNAME>
+----
+
+=== Return to your original user shell
+[source,sh]
+----
+exit
+----
+
+= ❄️ Nix installation
+
+== Add needed packages
+[source,sh]
+----
+sudo apk add --no-cache shadow bash curl xz openrc
+----
+
+== Fetch and execute `nix` install script
+[source,sh]
+----
+sh <(curl -L https://nixos.org/nix/install) --daemon
+----
+
+*  NO to more info
+* YES to sudo
+* YES to proceed with multi-user installation
+* YES to continue
+
+== Nix RC service script
+* */etc/init.d/nix-daemon*
+[source,sh]
+----
+#!/sbin/openrc-run
+description="Nix multi-user support daemon"
+
+command="/nix/var/nix/profiles/default/bin/nix-daemon"
+command_background="yes"
+pidfile="/run/$RC_SVCNAME.pid"
+----
+
+[source,sh]
+----
+su -
+chmod a+rx /etc/init.d/nix-daemon
+rc-update add nix-daemon
+rc-service nix-daemon start
+----
+
+== Post install steps
+[source,sh]
+----
+sudo adduser <USERNAME> nixbld
+
+sudo chown --recursive "$USER" /nix
+----
+
+== Unstable channel as default
+[source,sh]
+----
+nix-channel --add https://nixos.org/channels/nixos-unstable nixpkgs
+----
+
+== Garbage collection
+[source,sh]
+----
+nix-env --delete-generations old && nix-store --gc && nix-collect-garbage -d
+----
+
+== Open Remote WSL VSCodium support
+[source,sh]
+----
+sudo apk add gcompat libstdc++ procps
+----
+
+== Enable Nix Flakes
+*/etc/nix/nix.conf*
+[source,sh]
+----
+experimental-features = nix-command flakes
+build-users-group = nixbld
+----
+
+== The install script asks you to do the following (this might be different based on the OS you use)
+`echo ". /home/<USERNAME>/.nix-profile/etc/profile.d/nix.sh" >> ~/.profile`

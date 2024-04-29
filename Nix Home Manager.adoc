@@ -1,0 +1,6 @@
+
+== Home manager installation
+[source,sh]
+----
+nix run home-manager/master -- init --switch
+----
